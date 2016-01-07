@@ -8,9 +8,9 @@
 #
 ################################################################################
 #
-# This script runs audacity "$@" and passes the standard input to the audacity
-# mod-script-pipe interface. Responses from the mod-script-pipe interface are
-# returned through the standard output.
+# This script runs `audacity "$@"` and passes the standard input to the
+# Audacity mod-script-pipe interface. Responses from the mod-script-pipe
+# interface are returned through the standard output.
 #
 # The script requires that the mod-script-pipe module is installed, f.ex. to
 # 
@@ -30,7 +30,7 @@ TO=/tmp/audacity_script_pipe.to.$REAL_UID
 [ -p $FROM ] && rm $FROM
 [ -p $TO ]   && rm $TO
 
-# Run audacity and put down its pid.
+# Run audacity and put down its PID.
 audacity "$@" 2>/dev/null &
 AUDACITY_PID=$!
 
@@ -39,26 +39,26 @@ while ! [ -p $FROM -a -p $TO ]; do
   sleep 1s
 done
 
-# Pass the responses from the $FROM pipe to stdout.
+# Pass the responses from $FROM to stdout.
 (while read OUTPUT; do
   printf '%s\n' "$OUTPUT"
-done <$FROM | head -n-3 # For some reason, mod-script-pipe sends \n\n\n at EOF.
+done <$FROM | head -n-3 # mod-script-pipe sends \n\n\n at EOF and we also need
+                        # remove the output from the `Exit` menu command.
 
-# Forcibly kill audacity, when the $FROM pipe closes.
+# Forcibly kill Audacity, when $FROM closes.
 kill -TERM $AUDACITY_PID
 
-# Clean up after audacity.
+# Clean up after Audacity.
 rm $FROM $TO
 for REPORT in /tmp/audacity_dbgrpt-*; do
   [ -d "$REPORT" ] && rm -rf "$REPORT"
 done) &
 
-# Feed stdin into the $TO pipe.
+# Feed stdin into $TO.
 while read INPUT; do
   printf '%s\n' "$INPUT"
 done >$TO
 
-# Once we've hit the EOF, send the Exit menu command. This will cause the
-# $FROM pipe to close and audacity to crash. This is handled by the process
-# reading from the $FROM pipe.
+# Once we've hit the EOF, send the `Exit` menu command. This will close $FROM
+# crash Audacity. This is handled by the forked process reading from $FROM.
 echo 'MenuCommand: CommandName=Exit' >$TO

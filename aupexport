@@ -8,9 +8,9 @@
 #
 ################################################################################
 #
-# This script exports an audacity project $1 to an output file $2. $2 may not
-# contain double apostrophes ("). The audacity mod-script-pipe bridge provides
-# no (documented) escaping mechanism.
+# This script exports an Audacity project $1 to an output file $2. $2 may not
+# contain double apostrophes ("); the Audacity mod-script-pipe interface
+# provides no (documented) escaping mechanism.
 #
 ################################################################################
 
