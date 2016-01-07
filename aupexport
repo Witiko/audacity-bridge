@@ -1,0 +1,18 @@
+#!/bin/sh
+################################################################################
+#
+# Copyright (C) 2016 Vít Novotný
+# License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
+# This is free software: you are free to change and redistribute it.
+# There is NO WARRANTY, to the extent permitted by law.
+#
+################################################################################
+#
+# This script exports an audacity project $1 to an output file $2. $2 may not
+# contain double apostrophes ("). The audacity mod-script-pipe bridge provides
+# no (documented) escaping mechanism.
+#
+################################################################################
+
+printf 'Export: Mode=All Filename="%s" Channels=2\n' "$2" |
+  audacity-bridge "$1" | tail -n1 | grep -q '^Export finished: OK$'

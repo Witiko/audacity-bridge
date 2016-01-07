@@ -1,0 +1,64 @@
+#!/bin/bash
+################################################################################
+#
+# Copyright (C) 2016 Vít Novotný
+# License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
+# This is free software: you are free to change and redistribute it.
+# There is NO WARRANTY, to the extent permitted by law.
+#
+################################################################################
+#
+# This script runs audacity "$@" and passes the standard input to the audacity
+# mod-script-pipe interface. Responses from the mod-script-pipe interface are
+# returned through the standard output.
+#
+# The script requires that the mod-script-pipe module is installed, f.ex. to
+# 
+#   ~/.audacity-files/modules/mod-script-pipe.so
+#
+# and enabled in audacity. For more information, see
+#
+#   http://manual.audacityteam.org/o/man/scripting.html
+#
+################################################################################
+
+REAL_UID=`id -ur`
+FROM=/tmp/audacity_script_pipe.from.$REAL_UID
+TO=/tmp/audacity_script_pipe.to.$REAL_UID
+
+# Remove existing pipes.
+[ -p $FROM ] && rm $FROM
+[ -p $TO ]   && rm $TO
+
+# Run audacity and put down its pid.
+audacity "$@" 2>/dev/null &
+AUDACITY_PID=$!
+
+# Wait for the mod-script-pipe module to kick in.
+while ! [ -p $FROM -a -p $TO ]; do
+  sleep 1s
+done
+
+# Pass the responses from the $FROM pipe to stdout.
+(while read OUTPUT; do
+  printf '%s\n' "$OUTPUT"
+done <$FROM | head -n-3 # For some reason, mod-script-pipe sends \n\n\n at EOF.
+
+# Forcibly kill audacity, when the $FROM pipe closes.
+kill -TERM $AUDACITY_PID
+
+# Clean up after audacity.
+rm $FROM $TO
+for REPORT in /tmp/audacity_dbgrpt-*; do
+  [ -d "$REPORT" ] && rm -rf "$REPORT"
+done) &
+
+# Feed stdin into the $TO pipe.
+while read INPUT; do
+  printf '%s\n' "$INPUT"
+done >$TO
+
+# Once we've hit the EOF, send the Exit menu command. This will cause the
+# $FROM pipe to close and audacity to crash. This is handled by the process
+# reading from the $FROM pipe.
+echo 'MenuCommand: CommandName=Exit' >$TO
