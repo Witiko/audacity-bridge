@@ -38,6 +38,7 @@ AUDACITY_PID=$!
 while ! [ -p $FROM -a -p $TO ]; do
   sleep 1s
 done
+sleep 1s # TODO: Find a better way to ensure that Audacity is ready to receive.
 
 # Pass the responses from $FROM to stdout.
 (while read OUTPUT; do
@@ -60,5 +61,5 @@ while read INPUT; do
 done >$TO
 
 # Once we've hit the EOF, send the `Exit` menu command. This will close $FROM
-# crash Audacity. This is handled by the forked process reading from $FROM.
+# & crash Audacity. This is handled by the forked process reading from $FROM.
 echo 'MenuCommand: CommandName=Exit' >$TO
