@@ -8,11 +8,12 @@
 #
 ################################################################################
 #
-# This script exports an Audacity project $1 to an output file $2. $2 may not
-# contain double apostrophes ("); the Audacity mod-script-pipe interface
-# provides no (documented) escaping mechanism.
+# This script exports an Audacity project $1 to an output file $2. Neither $1
+# nor $2 may contain double apostrophes ("); the Audacity mod-script-pipe
+# interface provides no (documented) escaping mechanism.
 #
 ################################################################################
 
-printf 'Export: Mode=All Filename="%s" Channels=2\n' "$2" |
-  audacity-bridge "$1" | tail -n1 | grep -q '^Export finished: OK$'
+{ printf 'OpenProject: Filename="%s" AddToHistory=no\n' "$1";
+  printf 'Export: Mode=All Filename="%s" Channels=2\n' "$2"; } |
+  audacity-bridge | tail -n1 | grep -q '^Export finished: OK$'
