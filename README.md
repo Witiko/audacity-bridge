@@ -22,6 +22,12 @@ any audio file format understood by Audacity; it also showcases the use of the
    modal dialogue pops up, when Audacity starts up (f.ex. an orphaned files
    warning).  This dialogue prevents the project file from being loaded, but
    the `audacity-bridge` client has limited means of detecting this.
+4. While the Audacity splash screen is displayed, incoming messages are silently
+   gobbled. This is handled by adding a [fixed sleep](audacity-bridge#L41) at
+   the beginning of the script, but this solution is brittle.
+5. Upon receiving the Exit MenuCommand, [Audacity crashes](audacity-bridge#L61).
+   The `audacity-bridge` handles this internally, so no action is required on
+   the part of the user.
 
 # License
 This script is [released under GNU GPLv3](LICENSE).
