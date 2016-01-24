@@ -41,10 +41,8 @@ done
 sleep 1s # TODO: Find a better way to ensure that Audacity is ready to receive.
 
 # Pass the responses from $FROM to stdout.
-(while read OUTPUT; do
-  printf '%s\n' "$OUTPUT"
-done <$FROM | head -n-3 # mod-script-pipe sends \n\n\n at EOF and we also need
-                        # remove the output from the `Exit` menu command.
+(<$FROM head -n-3 # mod-script-pipe sends \n\n\n at EOF and we also need
+                  # remove the output from the `Exit` menu command.
 
 # Forcibly kill Audacity, when $FROM closes.
 kill -TERM $AUDACITY_PID
