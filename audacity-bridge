@@ -53,7 +53,7 @@ EOF
 done
 
 # Release $LOCK in the case of an unexpected termination.
-trap "rm $LOCK" 1 2 3 6 15
+trap "rm $LOCK; exit 1" 1 2 3 6 15
 
 # Remove existing pipes.
 [ -p $FROM ] && rm $FROM
