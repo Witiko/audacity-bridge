@@ -20,11 +20,11 @@ any audio file format understood by Audacity; it also showcases the use of the
    warning).  This dialogue prevents the project file from being loaded, but
    the `audacity-bridge` client has limited means of detecting this.
 3. While the Audacity splash screen is displayed, incoming messages are silently
-   gobbled. This is handled by adding a [fixed sleep](audacity-bridge#L41) at
+   gobbled. This is handled by adding a [fixed sleep](audacity-bridge#L70) at
    the beginning of the script, but this solution is brittle.
 4. Upon receiving the Exit MenuCommand, Audacity crashes at Linux. The
-   `audacity-bridge` script [handles this internally](audacity-bridge#L61), so
+   `audacity-bridge` script [handles this internally](audacity-bridge#L76), so
    no action is required on the part of the user.
 
 # License
-This script is [released under GNU GPLv3](LICENSE).
+This script is [released under GNU GPLv3](COPYING).
