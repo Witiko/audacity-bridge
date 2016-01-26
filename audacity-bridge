@@ -25,6 +25,24 @@
 REAL_UID=`id -ur`
 FROM=/tmp/audacity_script_pipe.from.$REAL_UID
 TO=/tmp/audacity_script_pipe.to.$REAL_UID
+LOCK=/tmp/audacity_bridge.$REAL_UID
+
+# Obtain $LOCK.
+ANNOUNCED=false
+while ! (set -o noclobber; echo "$$" >$LOCK) 2>&-; do
+  if ! $ANNOUNCED; then
+    ANNOUNCED=true
+    cat 1>&2 <<EOF
+Waiting for another instance of 'audacity-bridge' (PID `cat $LOCK`) to quit.
+If you are certain no other instance of 'audacity-bridge' is running, remove
+the file '$LOCK'.
+EOF
+  fi
+  sleep 1s # This may starve.
+done
+
+# Release $LOCK in the case of an unexpected termination.
+trap "rm $LOCK" 1 2 3 6 15
 
 # Remove existing pipes.
 [ -p $FROM ] && rm $FROM
@@ -41,7 +59,7 @@ done
 sleep 1s # TODO: Find a better way to ensure that Audacity is ready to receive.
 
 # Pass the responses from $FROM to stdout.
-(<$FROM head -n-3 # mod-script-pipe sends \n\n\n at EOF and we also need
+(<$FROM head -n-3 # mod-script-pipe sends \n\n\n at EOF and we also need to
                   # remove the output from the `Exit` menu command.
 
 # Forcibly kill Audacity, when $FROM closes.
@@ -51,7 +69,10 @@ kill -TERM $AUDACITY_PID
 rm $FROM $TO
 for REPORT in /tmp/audacity_dbgrpt-*; do
   [ -d "$REPORT" ] && rm -rf "$REPORT"
-done) &
+done
+
+# Release $LOCK.
+rm $LOCK) &
 
 # Feed stdin into $TO.
 while read INPUT; do
